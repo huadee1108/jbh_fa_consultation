@@ -1,0 +1,242 @@
+<title>专家解答列表</title>
+<style>
+    .comments_skin {
+        background: rgb(229, 226, 226);
+    }
+</style>
+
+<div class="layui-card layadmin-header">
+    <div class="layui-breadcrumb" lay-filter="breadcrumb">
+        <a lay-href="">主页</a>
+        <a><cite>专家解答列表</cite></a>
+    </div>
+</div>
+
+<div class="layui-fluid" id="LAY-app-comments_exp-manage">
+    <div id='comments_exp-manage-view'></div>
+</div>
+
+<script type="text/html" id="comments_expManage">
+    <div class="layui-card">
+        <div class="layui-tab layui-tab-brief">
+            <ul class="layui-tab-title title-tab">
+                <li class="layui-this" data-name="off">未回复</li>
+                <li data-name="on">已回复</li>
+            </ul>
+        </div>
+        <form class="layui-form" action="" style="margin-top:30px;margin-right: 15px;" lay-filter="layadmin-manage-formcomments_exp" id="layadmin-manage-formcomments_exp">
+            <div class="layui-row">
+                <div class="layui-col-md3 layui-col-sm4">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">时间：</label>
+                        <div class='layui-input-block flex date-range'>
+                            <input class="date-range-item" data-start='timeStart' data-end='timeEnd'>
+                            <div class="layui-input-inline flex-1 wavy-line">
+                                <input type="text" class="layui-input" name='timeStart'>
+                            </div>
+                            <div class="layui-input-inline flex-1" style="margin-right: 0">
+                                <input type="text" class="layui-input" name='timeEnd'>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-col-md3 layui-col-sm6">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">手机：</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="phone" 
+                                autocomplete="off" class="layui-input">
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-col-md3 layui-col-sm6">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">留言内容：</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="content"
+                                autocomplete="off" class="layui-input">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-row">
+                <div class="layui-col-sm12">
+                    <div class="layui-form-item">
+                        <div class="layui-input-block pull-right">
+                            <button class="layui-btn w100" lay-submit lay-filter='comments_exp-manage-query'>查询</button>
+                            <button type="reset" class="layui-btn layui-btn-primary" id="" style="display:none;">重置</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="comments_expbox">
+        <div class="tb-tool-item layui-card layui-show">
+            <table class="layui-table" id='comments_exp-manage-table' lay-filter='comments_exp-manage-table'></table>
+        </div>
+    </div>
+</script>
+
+<script>
+    layui.use(['element', 'form', 'ajax', 'jquery', 'renders', 'table', 'api', 'laytpl', 'laydate'], function () {
+        var form = layui.form,
+            element = layui.element,
+            $ = layui.jquery,
+            table = layui.table,
+            laytpl = layui.laytpl,
+            renders = layui.renders,
+            api = layui.api,
+            laydate = layui.laydate,
+            ajax = layui.ajax;
+
+        // 动态渲染主体内容
+        var getTpl = comments_expManage.innerHTML, view = $("#comments_exp-manage-view");
+        var url = "/admin/chat/findChatList", //表格数据接口
+            page = { layout: ['count', 'prev', 'page', 'next', 'skip'], next: '下一页', prev: '上一页', groups: 10, limit: 10, theme: 'tb-page' },
+            where = { replyState: 0, chatType: 1, employeeRole: api.getUserInfo().employeeRole };//储存当前搜索条件
+        var tab = 0;
+
+        laytpl(getTpl).render({}, function (html) {
+            view.html(html);
+            form.render();
+
+            // 表格渲染
+            var toolbarTemp = '<div><div class="tb-tool layui-row">' +
+                '<div class="tb-tool-count pull-left">' +
+                '</div>' +
+                '<div class="pull-right tb-tool-tab">' +
+                '</div>' +
+                '</div></div>';
+            var toolrowTemp1 = "<div>" +
+                "<div class='btn-groups'>" +
+                "<span class='btn-edit ml-10' lay-event='answer'>回复</span>" +
+                "</div></div>";
+            var cols1 = [[
+                { field: 'createDate', title: '留言时间', align: 'center', width: '16%' },
+                { field: 'realName', title: '姓名', align: 'center', width: '16%' },
+                { field: 'phone', title: '电话', align: 'center', width: '16%' },
+                { field: 'content', title: '留言内容', align: 'center', width: '20%', style: 'text-align:left', templet: function (d) { return "<div style='color:red'>" + d.content + "</div>" } },
+                { field: 'expertName', title: '专家姓名', align: 'center', width: '16%' },
+                { field: '', title: '操作', align: 'center', templet: toolrowTemp1 }
+            ]],
+                cols2 = [[
+                { field: 'createDate', title: '留言时间', align: 'center', width: '16%' },
+                { field: 'realName', title: '姓名', align: 'center', width: '16%' },
+                { field: 'phone', title: '电话', align: 'center', width: '16%' },
+                { field: 'content', title: '留言内容', align: 'center', width: '20%', style: 'text-align:left', templet: function (d) { return "<div style='color:red'>" + d.content + "</div>" } },
+                { field: 'expertName', title: '专家姓名', align: 'center', width: '16%' },
+                { field: '', title: '操作', align: 'center', templet: toolrowTemp1 }
+                ]],
+                cols = cols1;
+            var defaultToolbar1 = [],
+                defaultToolbar2 = [];
+            var defaultToolbar = defaultToolbar1;
+            var mTable = table.render({
+                id: 'comments_exp-manage-table',
+                elem: '#comments_exp-manage-table',
+                url: api.getApi(url),
+                where: where,
+                even: true,
+                page: page,
+                method: 'get',
+                parseData: function (res) { console.log(); return { "code": res.ret == 100 ? 0 : 1, "msg": res.msg, "count": res.data.total, "data": res.data.list } },
+                request: { pageName: 'pageNum', limitName: "pageSize" },
+                toolbar: toolbarTemp,
+                defaultToolbar: [],
+                text: { "none": '无数据' },
+                cols: cols,
+                done: function (res, curr, count) {
+                    this.where = where;//获取最新搜索条件
+                }
+            });
+
+            // 日期控件
+            lay('.date-range .date-range-item').each(function () {
+                    var that = this;
+                    var ele = $(this).parents('.date-range');
+                    laydate.render({
+                        elem: this,
+                        range: true,
+                        trigger: 'click',
+                        done: function (value, date, endDate) {
+                            var startdate = '',
+                                enddate = '';
+                            if (value) {
+                                startdate = date.year + '-' + api.markZero(date.month, 2) + "-" + api.markZero(date.date, 2),
+                                    enddate = endDate.year + '-' + api.markZero(endDate.month, 2) + '-' + api.markZero(endDate.date, 2);
+                            }
+                            ele.find('input[name="' + that.dataset.start + '"]').val(startdate);
+                            ele.find('input[name="' + that.dataset.end + '"]').val(enddate);
+                        }
+                    })
+                })
+            
+            //选项卡切换 表格重载
+            $('#LAY-app-comments_exp-manage .title-tab li').on('click', function () {
+                if ($(this).data('name') == "on") {//已回复
+                    cols = cols2;
+                    defaultToolbar = defaultToolbar2;
+                    url = '/admin/chat/findChatList';
+                    where.replyState = 1;
+                    tab = 1;
+                } else {//未回复
+                    cols = cols1;
+                    defaultToolbar = defaultToolbar1;
+                    url = '/admin/chat/findChatList';
+                    where.replyState = 0;
+                    tab = 0;
+                }
+                mTable.reload({ where: where, cols: cols, url: api.getApi(url), page: page, defaultToolbar: defaultToolbar });
+            });
+            //监听搜索
+            form.on('submit(comments_exp-manage-query)', function (data) {
+                if (data.field.timeStart) {
+                        var timeStart = data.field.timeStart.replace(/-/g, "/");
+                        data.field.timeStart = timeStart + ' ' + '00:00:00';
+                        // data.field.timeStart = new Date(timeStart).toLocaleDateString();
+                    }
+                    if (data.field.timeEnd) {
+                        var timeEnd = data.field.timeEnd.replace(/-/g, "/");
+                        data.field.timeEnd = timeEnd + ' ' + '23:59:59';
+                        // data.field.timeEnd = new Date(timeEnd).toLocaleDateString();
+                    }
+                where = api.filterData(data.field);
+                if (tab == 0) {
+                    where.replyState = 0;
+                } else {
+                    where.replyState = 1;
+                }
+                where.chatType = 1;
+                where.employeeRole = api.getUserInfo().employeeRole;
+                mTable.reload({ where: where, cols: cols, url: api.getApi(url), page: page, defaultToolbar: defaultToolbar });//不携带上次参数
+                return false;
+            });
+
+            //监听表格点击事件
+            table.on("tool(comments_exp-manage-table)", function (obj) {
+                var id = obj.data.id;
+                var realName = obj.data.realName;
+                var phone = obj.data.phone;
+
+                switch (obj.event) {
+                    case "answer":
+                        renders.con({
+                            type: 2,
+                            content: layui.setter.base + "views/comments/detail/comDetail.html?id=" + id,
+                            title: realName+'('+phone+')',
+                            resize: false,
+                            maxmin: false,
+                            offset: 'auto',
+                            area: ['800px', '609px'],
+                            skin: 'comments_skin',
+                            end: function () {
+                                mTable.reload({ where: where });
+                            }
+                        });
+                        break;
+                }
+            });
+        })
+    })
+</script>

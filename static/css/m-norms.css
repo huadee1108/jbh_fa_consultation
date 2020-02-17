@@ -1,0 +1,52 @@
+.add-circle,
+.del-circle {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  display: inline-block;
+  color: #fff;
+  text-align: center;
+  cursor: pointer;
+}
+.add-circle {
+  background: green;
+  font-size: 28px;
+  line-height: 22px;
+}
+.del-circle {
+  background: red;
+  margin-left: 6px;
+  font-size: 47px;
+  line-height: 20px;
+  position: relative;
+  top: 5px;
+}
+.tableText {
+  padding-top: 40px;
+}
+.norm-h {
+  display: inline-block;
+  width: 170px;
+  height: 30px;
+  text-align: left;
+}
+.norm-left {
+  margin-left: 15px;
+}
+.input-data .bac {
+  width: 1500px;
+  display: flex;
+}
+.input-data .wid {
+  display: inline-block;
+  width: 170px;
+  margin-left: 5px;
+  padding-bottom: 8px;
+}
+.input-data .padd {
+  padding-left: 0;
+}
+#status {
+  width: auto;
+  padding-bottom: 0;
+}

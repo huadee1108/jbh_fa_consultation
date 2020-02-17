@@ -1,0 +1,140 @@
+html {
+	height: 100%;
+}
+body {
+	color: #000;
+    background-image: url('../images/b1.png');
+    background-repeat: no-repeat;
+	background-size: cover;
+	height: -webkit-fill-available;
+	min-height:800px;
+	height: 100%;
+}
+a{
+	color: #fff;
+}
+.login-wrapper{
+	/* display: -webkit-box;
+	display: -moz-flex;
+	display: -webkit-flex;
+	display: -ms-flex;
+	justify-content: center;
+	align-items: center;
+	width: 100vw;
+	height: 100vh; */
+	border-top:1px solid transparent;
+}
+.login-wrapper .wrap-img{
+	text-align: center;
+	margin-bottom:43px;
+	margin-top:23px;
+}
+.login-wrapper .cc{
+  position: relative;
+	margin: 0 auto;
+	margin-top: 15%;
+  width: 27%;
+  max-width: 524px;
+	padding:42px 44px;
+	background-color: rgba(166, 205, 249, .06);
+	border-radius: 6px;
+	box-sizing: border-box;
+}
+.cc .bg-logo{
+	width:63px;
+	height:65px;
+}
+.cc .layui-input{
+	box-sizing: border-box;
+	border:1px solid #ddd;
+	padding-left: 46px;
+	font-size:14px;
+	border-radius: 3px;
+}
+.cc .layui-form-item{
+	position: relative;
+}
+.cc .divimg{
+	width:20px;
+	height:20px;
+	position: absolute;
+	top:8px;
+  left:10px;
+}
+.cc .divimg::before {
+ content: "";
+ position: absolute;
+ right: -10px;
+ width: 1px;
+ height: 20px;
+ border-right: 1px solid #AAAAAA;
+}
+
+.cc .imgCodeimg::before {
+  border-right: 0
+}
+
+.cc .accountimg{
+	background: transparent url('../images/account.png') no-repeat center center;
+}
+.cc .passWordimg{
+	background: transparent url('../images/password.png') no-repeat center center;
+}
+.cc .imgCodeimg{
+	background: transparent url('../images/code.png') no-repeat center center;
+}
+.cc .imgCode{
+	width:46%;
+	display: inline-block;
+}
+.cc .divimg { background-size: contain }
+.cc input::-webkit-input-placeholder{font-size:14px;}    /* 使用webkit内核的浏览器 */
+.cc input:-moz-placeholder{font-size:14px;}                  /* Firefox版本4-18 */
+.cc input::-moz-placeholder{font-size:14px;}                  /* Firefox版本19+ */
+.cc input:-ms-input-placeholder{font-size:14px;}           /* IE浏览器 */
+.cc #imgcode{
+	width:77px;
+	height:35px;
+	display: inline-block;
+	margin-left:15px;
+}
+.cc #acode{
+	color:#88A6C8;
+	cursor: pointer;
+	position: relative;
+	top:3px;
+	left:15px;
+	font-size:14px;
+}
+.cc .layui-btn{
+	width:100%;
+	background: #3674E1;
+	font-size:14px!important;
+	color:#C5EEFF;
+}
+.ipt-verify-wrap {
+  position: relative;
+}
+.ipt-verify-tips {
+  position: absolute;
+  top: -18px;
+	visibility: hidden;
+	color: red;
+}
+.login-tit {
+  position: absolute;
+  color: #fff;
+  top: -20%;
+  left: 0;
+  font-size: 40px;
+  width: 100%;
+  text-align: center;
+}
+.eyes {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  right: 6px;
+  top: 4px;
+}

@@ -1,0 +1,158 @@
+<title>首页</title>
+
+<div class="layui-fluid">
+  <div id="home-view"></div>
+</div>
+
+<script type="text/html" id="homeTpl">
+    <div class="layui-card pos-relative" style="height: 430px; ">
+        <div class="layui-row pos-absolute" style="width: 100%" >
+            <div class="layui-col-md3 layui-col-sm6">
+                <label class="layui-form-label">年月：</label>
+                <div class="layui-input-block">
+                    <input type="text" class="layui-input home-datetime">
+                </div>
+            </div>
+        </div>
+        <div class="flex">
+            <div class="flex-1"><canvas id="home-chart" style=" width: 100%; height: 400px;  " ></canvas></div>
+        </div>
+    </div> 
+</script>
+
+<script>
+    layui.use(['element', 'form', 'ajax', 'jquery', 'renders', 'table', 'api', 'laytpl','verifys', 'laydate', 'f2'], function () {
+        var form = layui.form,
+            element = layui.element,
+            $ = layui.jquery,
+            table = layui.table,
+            laytpl = layui.laytpl,
+            renders = layui.renders,
+            api = layui.api,
+            verifys = layui.verifys,
+            laydate = layui.laydate,
+            ajax = layui.ajax,
+            F2 = layui.f2;
+
+        // 动态渲染主体内容
+        var getTpl = homeTpl.innerHTML, 
+            view = $("#home-view");
+        var url = "/admin/chat/track/getChatTrack"; // 图表数据接口
+        var nowDate = new Date();
+        var datetime = nowDate.getFullYear()+'-'+api.markZero(nowDate.getMonth()+1, 2);
+        // 图表配置
+        var chart = null;
+
+        laytpl(getTpl).render({}, function (html) {
+            view.html(html);
+            form.render();
+
+            // 初始化时间组件
+            laydate.render({ 
+                elem: view.find(".home-datetime")[0],
+                type: 'month',
+                done: function(value, date, endDate){
+                    datetime = value;
+                    getData();
+                }
+            });
+            
+            chart = new F2.Chart({
+                id: 'home-chart',
+                pixelRatio: window.devicePixelRatio
+            })
+            getData();
+        })
+
+        // 获取图表数据
+        function getData(){
+            ajax({
+                type: 'GET',
+                url: url,
+                data: { time: datetime},
+                callback: function(res){
+                  rendersEcharts(res.data)
+                }
+            })
+            
+        }
+
+        function rendersEcharts(d){
+            chart.clear();
+            var _year = datetime.split('-')[0];
+            var _month = datetime.split('-')[1]; 
+            var _time = new Date(_year, _month , 0);
+            var dateAll = _time.getDate();
+
+            let data = [];
+
+            // 生成初始数据
+            for(var i = 1; i<= dateAll; i++){
+                t = _month+'.'+api.markZero(i,2);
+                data.push({
+                    type: '在线-点击', date: t , value: 0, group: 'onlineOnclickNum'
+                })
+                data.push({
+                    type: '在线-留言', date: t, value: 0, group: 'onlineSmsNum'
+                })
+                data.push({
+                    type: '专家-点击', date: t, value: 0, group: 'expertClickNum'
+                })
+                data.push({
+                    type: '专家-留言', date: t, value: 0, 'group': 'expertSmsNum'
+                })
+            }
+
+            for(let k in d){
+              d[k].forEach(function(item){
+                data.forEach(function(_item){
+                  if(item.time===_item.date && k === _item.group ){
+                    _item.value = item.occorNum||0;
+                  }
+                })
+              })
+            }
+
+            chart.source(data);
+            // chart.scale('date', {
+            //     type: 'timeCat',
+            //     tickCount: 3
+            // });
+            // chart.scale('value', {
+            //     tickCount: 1
+            // });
+            chart.axis('date', {
+                label: function label(text, index, total) {
+                    // 只显示每一年的第一天
+                    const textCfg = {
+                      rotate: Math.PI/6,
+                    };
+                    if (index === 0) {
+                    textCfg.textAlign = 'left';
+                    } else if (index === total - 1) {
+                    textCfg.textAlign = 'right';
+                    }
+                    return textCfg;
+                }
+            });
+            chart.legend({
+                align: 'right',
+                itemWidth: null,
+                marker: function marker(x, y, r, ctx) {
+                    x = x+70;
+                    ctx.lineWidth = 1;
+                    ctx.strokeStyle = ctx.fillStyle;
+                    ctx.moveTo(x - r - 3, y);
+                    ctx.lineTo(x + r + 3, y);
+                    ctx.stroke();
+                    ctx.arc(x, y, r, 0, Math.PI * 2, false);
+                    ctx.fill();
+                }
+            });
+            chart.line().position('date*value').color('type', ['#159DFF', '#4AF9BE', '#F692BB', '#C0A6F3']);
+            chart.render();
+        }
+
+    })
+</script>
+

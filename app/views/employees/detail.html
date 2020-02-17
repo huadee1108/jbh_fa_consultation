@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>人员信息</title>
+	<meta name="renderer" content="webkit">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport"
+		content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+	<link rel="stylesheet" href="../../../layui/css/layui.css" media="all" />
+  <link rel="stylesheet" href="../../../static/css/base.css" media="all" />
+  <link rel="stylesheet" href="../../../static/css/view/employees.css">
+  </head>
+  <body class="childrenBody skin-form-flex pt-20">
+    <script type="text/html" id="pageTpl">
+      <form class="layui-form layui-fluid" lay-filter="form-filter">
+        <div class="layui-form-item">
+          <label class="layui-form-label s-require">姓名：</label>
+          <div class="layui-input-block">
+            <input type="text" class="layui-input" maxlength='10' lay-verify="nickname" name="employeeName" autocomplete="off">
+          </div>
+        </div>
+        <div class="layui-form-item">
+          <label class="layui-form-label s-require">账号：</label>
+          <div class="layui-input-block">
+            <input type="text" class="layui-input" maxlength='11' lay-verify="account" name="employeeAccount" autocomplete="off">
+          </div>
+        </div>
+        <div class="layui-form-item">
+          <label class="layui-form-label s-require">密码：</label>
+          <div class="layui-input-block">
+            <input type="password" class="layui-input" maxlength="{{ !d.mode?'20':'' }}" lay-verify="{{ !d.mode?'pass':'' }}" name="employeePwd" autocomplete="off">
+          </div>
+        </div>
+        <div class="layui-form-item">
+          <label class="layui-form-label s-require">状态：</label>
+          <div class="layui-input-block">
+            <input type="radio" name="status" value="1" title="在线">
+            <input type="radio" name="status" value="0" title="离线">
+          </div>
+        </div>
+        <div class="layui-form-item">
+          <label class="layui-form-label">头像：</label>
+           <div class="layui-input-block">
+              <div class="employees-avatar">
+                  <img src='' id='up-pic' alt=''>
+                  <input type="hidden" name="headImgUrl">
+              </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+          <label class="layui-form-label s-require">简介：</label>
+          <div class="layui-input-block">
+            <textarea placeholder="请输入内容" class="layui-textarea" maxlength='500' lay-verify="consulting" name="introduction"></textarea>
+          </div>
+        </div>
+        <div class="layui-form-item text-center">
+          <div class="layui-btn" lay-submit lay-filter="btn-submit">提交</div>
+        </div>
+      </form>
+    </script>
+    <script type="text/javascript" src="../../../layui/layui.js"></script>
+    <script type="text/javascript" src="../../controller/employees/detail.js"></script>
+  </body>
+  </html>

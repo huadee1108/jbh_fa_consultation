@@ -1,0 +1,149 @@
+
+<script type="text/html" template>
+    <link rel="stylesheet" href="./static/css/login.css?v={{ layui.admin.v }}-1" media="all">
+</script>
+
+<div class="login-wrapper">
+
+    <div class="cc">
+        <img class="login-tit" src="/static/images/title.png" alt="">
+        <form class="layui-form" lay-filter='f-groups'>
+            <div class="ipt-verify-wrap">
+                <div class="ipt-verify-tips">账号或密码错误，请重新输入！</div>
+                <div class="layui-form-item">
+                    <div class="divimg accountimg"></div>
+                    <input type="text" name="account" maxlength="11" minlength="6" class="layui-input account ipt-verify" data-verify='account' placeholder="账号" autocomplete="on">
+                </div>
+                <div class="layui-form-item">
+                  <div class="divimg passWordimg pos-relative"></div>
+                    <input type="password" name="passWord" maxlength="16" minlength="6" class="layui-input passWord ipt-verify j-pass-ipt" data-verify="pass" placeholder="密码" autocomplete="on">
+                    <img class="j-eyes eyes" src="./static/images/close-eyes.png" alt="">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="divimg imgCodeimg"></div>
+                <input type="text" name="imgCode" maxlength='4' class="layui-input imgCode" id="code">
+                <img id="imgcode">
+                <a id="acode">换一组</a>
+            </div>
+            <div class="layui-form-item">
+                <button type="button" class="layui-btn" id="LAY-user-login-submit">登陆</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    layui.use(['admin', 'form', 'user', 'ajax', 'store','verifys','api','renders'], function () {
+        var $ = layui.$,
+            setter = layui.setter,
+            admin = layui.admin,
+            api = layui.api,
+            form = layui.form,
+            router = layui.router(),
+            search = router.search,
+            ajax = layui.ajax,
+            renders = layui.renders,
+            verifys = layui.verifys,
+            store = layui.store;
+        form.render();
+        var url = parent.layui.setter.debug ? layui.api.ip.a1 : layui.api.ip.b1;
+        var num = Math.ceil(Math.random() * 100);//生成一个随机数（防止缓存）
+
+        $("#imgcode").attr('src', url + '/api/other/captch/imageCaptcha?type=1&num='+num);
+
+        $("#acode").click(function(){
+            num = Math.ceil(Math.random() * 100);//生成一个随机数（防止缓存）
+            $("#imgcode").attr('src', url + '/api/other/captch/imageCaptcha?type=1&num='+num);
+        });
+
+        // 鼠标长按切换密码明文/密文
+        var passElem = $(".j-pass-ipt");
+        var showPassBtn = $(".j-eyes");
+        var showPass = false;
+        $("body").on("click", ".j-eyes", function(){
+          passElem.attr("type", !showPass?'password':'text')
+          showPassBtn.attr('src', !showPass?'/static/images/close-eyes.png':'/static/images/eyes.png');
+          showPass = !showPass;
+        })
+
+        //按enter键触发登录
+        $('.login-wrapper .account,.login-wrapper .passWord,.login-wrapper .imgCode').keyup(function (event) {
+            if (event.keyCode == 13) {
+                adminLogin();
+            }
+        });
+        //验证码
+        function testcode(){
+            var obj = {};
+            obj.type = 1;
+            obj.code = $("#code").val();
+            $.ajax({
+                type: 'POST',
+                xhrFields: { withCredentials: true },//带上cookie请求
+                crossDomain: true,
+                url: url + '/api/other/captch/validCode',
+                data: obj,
+                success: function (res) {
+                    if (res.ret == 100) {
+                        adminLogin();
+                    } else {
+                        renders.fail(res.msg);
+                        $("#acode").trigger('click');
+                    }
+                }
+            })
+        }
+        //提交
+        $('#LAY-user-login-submit').on('click',function(){
+            adminLogin();
+        });
+        //登录
+        function adminLogin(){
+            var err = false;
+            $(".ipt-verify").each(function(){
+                var len = $(this).val().length;
+                var max = $(this).prop('maxlength');
+                var min = $(this).attr('minlength')-0;
+                if(len>max||len<min){
+                    $('.ipt-verify-tips').css('visibility', 'visible')
+                    err = !0;
+                    return false;
+                }
+            })
+            if(err) return;
+            if (!$(".imgCode").val()) {
+                renders.fail('验证码不为空！');
+                return;
+            }
+            var obj = {};
+            obj.account = $(".account").val();
+            obj.passWord = $(".passWord").val();
+            obj.imgCode = $(".imgCode").val();
+            //请求登入接口
+            $.ajax({
+                type: 'POST',
+                xhrFields: { withCredentials: true },//带上cookie请求
+                crossDomain: true,
+                url: url + '/api/admin/employee/login',
+                // url: url + '/api/admin/login/login',
+                data: obj,
+                success: function (res) {
+                    store.set(setter.tableName, res, setter.expires);
+                    //登入成功的提示与跳转
+                    if (res.ret == 100) {
+                        renders.msg(res.msg, {
+                            end: function () {
+                                $("#acode").trigger('click');
+                                location.hash = search.redirect ? decodeURIComponent(search.redirect) : '/';
+                            }
+                        });
+                    } else {
+                        renders.fail(res.msg);
+                        $("#acode").trigger('click');
+                    }
+                }
+            })
+        }
+    });
+</script>
